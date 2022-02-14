@@ -1,0 +1,1153 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>offline_test_EX</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-05-08"><meta name="DC.source" content="offline_test_EX.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Observer and Mpc</a></li><li><a href="#3">Parameters of Simulator Front</a></li><li><a href="#4">Parameters of Simulator Middle</a></li><li><a href="#5">Parameters of Simulator Final</a></li><li><a href="#6">Parameters of Simulator Brake</a></li><li><a href="#7">Sim</a></li><li><a href="#8">Diagram</a></li></ul></div><pre class="codeinput">  clear; clc; close <span class="string">all</span>; warning <span class="string">off</span>
+load <span class="string">OKIDGeneralModelexfront2</span>; Gso = G; Hso = H; Cso = C; <span class="comment">%&#21069;model</span>
+<span class="comment">% load OKIDGeneralModelab1; Gso = G; Hso = H; Cso = C;</span>
+load <span class="string">OKIDGeneralMiddle_4</span>; Go = G; Ho = H; Co = C; <span class="comment">%&#24460;model</span>
+load <span class="string">OKIDGeneralModelHigh</span>; G_Final = G; H_Final = H; C_Final = C; D_Final = D;
+load <span class="string">OKIDGeneralModelbrake2</span>; G_Brake = G; H_Brake = H; C_Brake = C; D_Brake = D;
+<span class="comment">% OKIDGeneralModelbrake</span>
+load <span class="string">ID_inf_example</span>;
+T_delay = 0;
+Ts = 0.1;Tend = 60+T_delay; Td = 50; Tf = 0.001;
+t_sim = 0:Ts:Tend;
+U_ideal(:,1) = Steer(1:length(t_sim)-T_delay/Ts,:);
+U_ideal(:,2) = Accelcmd(1:length(t_sim)-T_delay/Ts,:);
+Fcncal_transctrl_Ts = 0.01;
+Earlytochange = 1;
+Timetochange = 2; <span class="comment">%%sec</span>
+Earlytochange2 = 2.2;
+Timetochange2 = 4.8; <span class="comment">%%sec</span>
+Upd_end  = 60.2;
+Upd_flag = 1;
+<span class="comment">% Statechange = 0;</span>
+Statechange = Timetochange + 10*Ts;
+Statechange2 = Timetochange2 + 0*Ts;
+
+Dso = zeros(2,2);Do = zeros(2,2);
+DisSYS = ss(Gso,Hso,Cso,Dso,Ts);
+[Eigen_G, TransZeros] = pzmap(DisSYS)
+
+Nc = 6;
+Np = 6;
+n = size(Gso,1);               <span class="comment">% No. of states</span>
+m = size(Hso,2);               <span class="comment">% No. of inputs</span>
+p = size(Cso,1);               <span class="comment">% No. of outputs</span>
+<span class="comment">% Velocity = Velocity(1:length(t_sim),:);</span>
+<span class="comment">% Yaw = Yaw(1:length(t_sim),:);</span>
+<span class="comment">% XYplot = XYplot(1:length(t_sim),:);</span>
+
+
+<span class="keyword">for</span> i = 1:T_delay/Ts
+  Velocity = [Velocity; Velocity(end,:)];
+  Yaw = [Yaw; Yaw(end,:)];
+  XYplot = [XYplot; XYplot(end,:)];
+<span class="keyword">end</span>
+
+Ref = [Velocity Yaw];
+<span class="keyword">for</span> i = 1:Np
+    ref_end = [];
+    <span class="keyword">for</span> j = 1:i
+        ref_end = [ref_end;Ref(end,:)];
+    <span class="keyword">end</span>
+     Rs_part(:,2*i-1:2*i) = [Ref(i+1:end,:); ref_end];
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> i = 1:Np
+    ref_end = [];
+    <span class="keyword">for</span> j = 1:i
+        ref_end = [ref_end;Velocity(end,:)];
+    <span class="keyword">end</span>
+     V_mph_part(:,i) = [Velocity(i+1:end,:); ref_end];
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> i = 1:Np-1
+    ref_end = [];
+    <span class="keyword">for</span> j = 1:i
+        ref_end = [ref_end;Velocity(end,:)];
+    <span class="keyword">end</span>
+     V_mph_part_now(:,i) = [Velocity(i+1:end,:); ref_end];
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> i = 1:Np-1
+    ref_end = [];
+    <span class="keyword">for</span> j = 1:i
+        ref_end = [ref_end;Yaw(end,:)];
+    <span class="keyword">end</span>
+     Yaw_part_now(:,i) = [Yaw(i+1:end,:); ref_end];
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> i = 1:Np
+    ref_end = [];
+    <span class="keyword">for</span> j = 1:i
+        ref_end = [ref_end;Yaw(end,:)];
+    <span class="keyword">end</span>
+     Yaw_part(:,i) = [Yaw(i+1:end,:); ref_end];
+<span class="keyword">end</span>
+Yaw_part_ref = [Yaw(2:end,:); Yaw(end,:)];
+
+<span class="keyword">for</span> i = 1:2
+    ref_end = [];
+    <span class="keyword">for</span> j = 1:i
+        ref_end = [ref_end; XYplot(end,:)];
+    <span class="keyword">end</span>
+     XYplot_part(:,2*i-1:2*i) = [XYplot(i+1:end,:); ref_end];
+<span class="keyword">end</span>
+<span class="comment">% XYplot_part = [XYplot(2:end,:); XYplot(end,:)];</span>
+<span class="comment">%%Sequential VH update</span>
+XYplot_X = [];pick_num = 100;
+<span class="keyword">for</span> i = 1:length(t_sim)
+   <span class="keyword">if</span> i &lt;= pick_num/2
+       XYplot_X(:,i) = XYplot(1:pick_num,1);
+   <span class="keyword">elseif</span> i+pick_num/2 &lt;= length(t_sim)
+       XYplot_X(:,i) = XYplot(i-pick_num/2:i+pick_num/2-1,1);
+   <span class="keyword">else</span>
+       XYplot_X(:,i) = XYplot(end-pick_num+1:end,1);
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+XYplot_Y = [];
+<span class="keyword">for</span> i = 1:length(t_sim)
+   <span class="keyword">if</span> i &lt;= pick_num/2
+       XYplot_Y(:,i) = XYplot(1:pick_num,2);
+   <span class="keyword">elseif</span> i+pick_num/2 &lt;= length(t_sim)
+       XYplot_Y(:,i) = XYplot(i-pick_num/2:i+pick_num/2-1,2);
+   <span class="keyword">else</span>
+       XYplot_Y(:,i) = XYplot(end-pick_num+1:end,2);
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% figure();</span>
+<span class="comment">% hold on;</span>
+<span class="comment">% for i = 1:length(t_sim)</span>
+<span class="comment">%     plot(XYplot_Y(:,i),XYplot_X(:,i),'o');</span>
+<span class="comment">%</span>
+<span class="comment">% end</span>
+<span class="comment">% plot(XYplot(:,2),XYplot(:,1),'x');</span>
+Rs = [t_sim' Rs_part];
+Rs_V = [t_sim' V_mph_part];
+Rs_Y = [t_sim' Yaw_part];
+Rs_V_now = [t_sim' [Velocity V_mph_part_now]];
+Rs_Y_now = [t_sim' [Yaw Yaw_part_now]];
+Endpoint = XYplot(end,:);
+XY_Ref = [t_sim' XYplot_part];
+XYplot_X = [t_sim' XYplot_X'];
+XYplot_Y = [t_sim' XYplot_Y'];
+Yaw_Ref = [t_sim' Yaw_part_ref];
+T_sim = [t_sim' t_sim'];
+Heading_end = Yaw(end,:);
+</pre><pre class="codeoutput">
+Eigen_G =
+
+   0.9293 + 0.0000i
+  -0.0113 + 0.3245i
+  -0.0113 - 0.3245i
+  -0.5329 + 0.0000i
+
+
+TransZeros =
+
+    0.3067
+   -0.6290
+
+</pre><h2 id="2">Observer and Mpc</h2><pre class="codeinput">Qo = 1e18*eye(size(Go));
+Qso = 1e20*eye(size(Gso));
+Qho = 1e20*eye(size(Gso));
+Qbo = 1e20*eye(size(Gso));
+[Gsd,Hsd,Lsd] = Auxi_HG_Observer(Gso,Hso,Cso,Dso,Ts,Qso);
+[Gd,Hd,Ld] = Auxi_HG_Observer(Go,Ho,Co,Do,Ts,Qo);
+[Gd_Final,Hd_Final,Ld_Final] = Auxi_HG_Observer(G_Final,H_Final,C_Final,D_Final,Ts,Qho);
+[Gd_Brake,Hd_Brake,Ld_Brake] = Auxi_HG_Observer(G_Brake,H_Brake,C_Brake,D_Brake,Ts,Qbo);
+y0 = Ref(1,:);
+xho = Lsd*y0';
+<span class="comment">%== constraints parameters</span>
+
+<span class="comment">% R_bar = 1e-5*eye(m*Nc);</span>
+<span class="comment">% Qc = eye(p*Np);</span>
+<span class="comment">% for i  = 1:2:p*Np</span>
+<span class="comment">%     Qc(i,i) = 0.028;</span>
+<span class="comment">% end</span>
+
+R_bar = 6e-5*eye(m*Nc);
+Qc = eye(p*Np);
+<span class="keyword">for</span> i  = 1:2:p*Np
+    Qc(i,i) = 0.005;
+<span class="keyword">end</span>
+
+<span class="comment">% R_bar = 3e-5*eye(m*Nc);</span>
+<span class="comment">% Qc = eye(p*Np);</span>
+<span class="comment">% for i  = 1:2:p*Np</span>
+<span class="comment">%     Qc(i,i) = 0.02539;</span>
+<span class="comment">% end</span>
+
+[phis,Fs] = mpcgain_okid3(Gsd,Hsd,Cso,Dso,Lsd,Nc,Np);
+[phi,F] = mpcgain_okid3(Gd,Hd,Co,Do,Ld,Nc,Np);
+[phi_Final,F_Final] = mpcgain_okid3(Gd_Final,Hd_Final,C_Final,D_Final,Ld_Final,Nc,Np);
+[phi_Brake,F_Brake] = mpcgain_okid3(Gd_Brake,Hd_Brake,C_Brake,D_Brake,Ld_Brake,Nc,Np);
+
+M = [ eye(m*Nc);
+     -eye(m*Nc);
+      eye(m*Nc);
+     -eye(m*Nc);
+     ];
+
+ <span class="comment">%%=== HQP</span>
+u1_max =  5/3*pi; u1_min = -5/3*pi;
+u2_max = 1; u2_min = -1;
+
+ U_max = []; U_min = [];
+<span class="keyword">for</span> i = 1:Np
+    U_max = [U_max; [u1_max; u2_max]];
+    U_min = [U_min; [-u1_min; -u2_min]];
+<span class="keyword">end</span>
+
+JEs = 2*(phis'*Qc*phis+R_bar);
+JE = 2*(phi'*Qc*phi+R_bar);
+JE_Final = 2*(phi_Final'*Qc*phi_Final+R_bar);
+JE_Brake = 2*(phi_Brake'*Qc*phi_Brake+R_bar);
+
+JF_parts = -2*phis'*Qc;
+JF_part = -2*phi'*Qc;
+JF_part_Final = -2*phi_Final'*Qc;
+JF_part_Brake = -2*phi_Brake'*Qc;
+</pre><h2 id="3">Parameters of Simulator Front</h2><pre class="codeinput">G_Front = Gso; H_Front = Hso; C_Front = Cso; Ld_Front = Lsd; Gd_Front = Gsd; Hd_Front = Hsd;
+JE_Front = JEs; phi_Front = phis; F_Front = Fs;
+C_sim_Front = inv(eye(p)-C_Front*Ld_Front)*C_Front*(eye(n)-Ld_Front*C_Front);
+
+C_sys_Front = C_sim_Front - C_Front;
+G_sys_Front = (eye(n)+Ld_Front*C_sys_Front)*G_Front;
+H_sys_Front = (eye(n)+Ld_Front*C_sys_Front)*H_Front;
+
+C_out_Front = (C_sim_Front-C_Front*(eye(n)+Ld_Front*C_sys_Front))*G_Front;
+D_out_Front = (C_sim_Front-C_Front*(eye(n)+Ld_Front*C_sys_Front))*H_Front;
+</pre><h2 id="4">Parameters of Simulator Middle</h2><pre class="codeinput">G_Middle = Go; H_Middle = Ho; C_Middle = Co; Ld_Middle = Ld; Gd_Middle = Gd; Hd_Middle = Hd;
+JE_Middle = JE; phi_Middle = phi; F_Middle = F;
+C_sim_Middle = inv(eye(p)-C_Middle*Ld_Middle)*C_Middle*(eye(n)-Ld_Middle*C_Middle);
+
+C_sys_Middle = C_sim_Middle - C_Middle;
+G_sys_Middle = (eye(n)+Ld_Middle*C_sys_Middle)*G_Middle;
+H_sys_Middle = (eye(n)+Ld_Middle*C_sys_Middle)*H_Middle;
+
+C_out_Middle = (C_sim_Middle-C_Middle*(eye(n)+Ld_Middle*C_sys_Middle))*G_Middle;
+D_out_Middle = (C_sim_Middle-C_Middle*(eye(n)+Ld_Middle*C_sys_Middle))*H_Middle;
+</pre><h2 id="5">Parameters of Simulator Final</h2><pre class="codeinput">G_Final = G_Final; H_Final = H_Final; C_Final = C_Final; Ld_Final = Ld_Final; Gd_Final = Gd_Final; Hd_Final = Hd_Final;
+JE_Final = JE_Final; phi_Final = phi_Final; F_Final = F_Final;
+C_sim_Final = inv(eye(p)-C_Final*Ld_Final)*C_Final*(eye(n)-Ld_Final*C_Final);
+
+C_sys_Final = C_sim_Final - C_Final;
+G_sys_Final = (eye(n)+Ld_Final*C_sys_Final)*G_Final;
+H_sys_Final = (eye(n)+Ld_Final*C_sys_Final)*H_Final;
+
+C_out_Final = (C_sim_Final-C_Final*(eye(n)+Ld_Final*C_sys_Final))*G_Final;
+D_out_Final = (C_sim_Final-C_Final*(eye(n)+Ld_Final*C_sys_Final))*H_Final;
+</pre><h2 id="6">Parameters of Simulator Brake</h2><pre class="codeinput">G_Brake = G_Brake; H_Brake = H_Brake; C_Brake = C_Brake; Ld_Brake = Ld_Brake; Gd_Brake = Gd_Brake; Hd_Brake = Hd_Brake;
+JE_Brake = JE_Brake; phi_Brake = phi_Brake; F_Brake = F_Brake;
+C_sim_Brake = inv(eye(p)-C_Brake*Ld_Brake)*C_Brake*(eye(n)-Ld_Brake*C_Brake);
+
+C_sys_Brake = C_sim_Brake - C_Brake;
+G_sys_Brake = (eye(n)+Ld_Brake*C_sys_Brake)*G_Brake;
+H_sys_Brake = (eye(n)+Ld_Brake*C_sys_Brake)*H_Brake;
+
+C_out_Brake = (C_sim_Brake-C_Brake*(eye(n)+Ld_Brake*C_sys_Brake))*G_Brake;
+D_out_Brake = (C_sim_Brake-C_Brake*(eye(n)+Ld_Brake*C_sys_Brake))*H_Brake;
+</pre><h2 id="7">Sim</h2><pre class="codeinput">tic
+sim(<span class="string">'ISReferenceApplication'</span>);
+toc
+
+<span class="comment">% figure();</span>
+<span class="comment">% subplot(2,1,1);</span>
+<span class="comment">% plot(t_sim(),Simulator_U(:,1)); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,1));</span>
+<span class="comment">% title('Simulator steer angle'); xlabel('Time (s)'); ylabel('Steer (rad)');ylim([-5/3*pi  5/3*pi]);</span>
+<span class="comment">% legend('Control u','Desired u');</span>
+<span class="comment">% subplot(2,1,2);</span>
+<span class="comment">% plot(t_sim,Simulator_U(:,2)); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,2));</span>
+<span class="comment">% title('Simulator accel &amp; brake'); xlabel('Time (s)'); ylabel('Accel &amp; Brake');ylim([-1 1])</span>
+<span class="comment">% legend('Control u','Desired u');</span>
+<span class="comment">% sum(abs(Y(:,1)-Velocity_updated)) + sum(abs(Y(:,2)-Heading_angle_updated))</span>
+</pre><pre class="codeoutput error">Error using offline_test_EX (line 246)
+Program interruption (Ctrl-C) has been detected.
+</pre><h2 id="8">Diagram</h2><pre class="codeinput"><span class="keyword">if</span> length(Y) == length(t_sim)
+close <span class="string">all</span>;
+<span class="comment">% % Y &amp; Yhat</span>
+<span class="comment">% % subplot(2,1,1)</span>
+<span class="comment">% % plot(t_sim,Y(:,1),t_sim,Yhat(:,1)');</span>
+<span class="comment">% % title('Velocity vs. Estimated Velocity'); xlabel('Time (s)'); ylabel('Velocity (m/s)');</span>
+<span class="comment">% % subplot(2,1,2)</span>
+<span class="comment">% % plot(t_sim,Y(:,2),t_sim,Yhat(:,2)');</span>
+<span class="comment">% % title('Heading angle vs. Estimated heading angle'); xlabel('Time (s)'); ylabel('Yaw angle (rad)');</span>
+<span class="comment">%</span>
+figure();
+subplot(2,1,1);
+plot(t_sim,U(:,1)*180/pi); hold <span class="string">on</span>; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,1)*180/pi,<span class="string">'-.'</span>);
+title(<span class="string">'Steer angle'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Steer (deg)'</span>);ylim([-3*180/pi  5.2*180/pi]);
+legend(<span class="string">'Vehicle steer angle'</span>,<span class="string">'Desired steer angle'</span>,<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+subplot(2,1,2);
+plot(t_sim,U(:,2)); hold <span class="string">on</span>; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,2),<span class="string">'-.'</span>);
+title(<span class="string">'Accel. &amp; Brake'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Accel. &amp; Brake'</span>);ylim([-0.6 1.2])
+legend(<span class="string">'Vehicle accel./brake'</span>,<span class="string">'Desired accel./brake'</span>,<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+
+<span class="comment">% figure();</span>
+<span class="comment">% subplot(3,1,1);</span>
+<span class="comment">% plot(tout,Steer); title('Steer angle'); xlabel('Time (s)'); ylabel('Steer (rad)');ylim([-5/3*pi  5/3*pi]);</span>
+<span class="comment">% subplot(3,1,2)</span>
+<span class="comment">% plot(tout,Acceleration);title('Acceleration'); xlabel('Time (s)'); ylabel('Acceleration');ylim([0 1]);</span>
+<span class="comment">% subplot(3,1,3)</span>
+<span class="comment">% plot(tout,Brake); title('Brake'); xlabel('Time (s)'); ylabel('Brake');ylim([0 1]);</span>
+
+
+clear <span class="string">Desired_Heading_angle</span> <span class="string">Desired_Velocity</span>
+Sample_N = 10;
+<span class="keyword">for</span> i = 1:fix(length(t_sim)/Sample_N)+1
+    t_sample(i,:) = t_sim(:,1 + (i-1)*Sample_N);
+    Desired_Velocity(i,:) = Velocity(1 + (i-1)*Sample_N,1);
+    Desired_Heading_angle(i,:) = Yaw(1 + (i-1)*Sample_N,1);
+<span class="keyword">end</span>
+
+<span class="comment">% figure();</span>
+<span class="comment">% subplot(2,1,1)</span>
+<span class="comment">% plot(t_sim, Y(:,1), t_sample, Desired_Velocity(:,1),'x');</span>
+<span class="comment">% % plot(t_sim, Y(:,1), t_sample, Velocity_s,'rx');</span>
+<span class="comment">% % hold on; plot(t_sim(:,630), Velocity(630,:),'r x');plot(t_sim(:,end), Velocity(end,:));</span>
+<span class="comment">% title('Vehicle velocity vs. Desired velocity'); xlabel('Time (s)'); ylabel('Velocity (m/s)');</span>
+<span class="comment">% legend('Vehicle velocity', 'Desired velocity','location','southeast');</span>
+<span class="comment">% subplot(2,1,2)</span>
+<span class="comment">% plot(t_sim, Y(:,2), t_sample, Desired_Heading_angle(:,1),'x');</span>
+<span class="comment">% % plot(t_sim, Y(:,2), t_sample, Heading_angle_tmp_s,'rx');</span>
+<span class="comment">% % hold on; plot(t_sim(:,end), Heading_angle_tmp(end,:));</span>
+<span class="comment">% title('Vehicle heading angle vs. Desired heading angle'); xlabel('Time (s)'); ylabel('Heading angle (rad)');</span>
+<span class="comment">% legend('Vehicle heading angle', 'Desired heading angle','location','southeast');</span>
+
+<span class="comment">% % Track</span>
+clear <span class="string">Heading_angle_updated_s</span> <span class="string">Velocity_s</span> <span class="string">t_sample</span> <span class="string">Y_s</span>
+Sample_N = 10;
+Velocity_tmp = [Velocity(1,:); Velocity_updated(2:end,1)];
+Heading_angle_tmp = [Yaw(1:2,:); Heading_angle_updated(3:end,1)];
+<span class="comment">% Velocity_tmp = [Velocity(1,:); Velocity_updated(2:end-51,1); Velocity(651:end,:)];</span>
+<span class="comment">% Heading_angle_tmp = [Yaw(1:2,:); Heading_angle_updated(3:end-51,1);Yaw(651:end,:)];</span>
+<span class="keyword">for</span> i = 1:fix(length(t_sim)/Sample_N)+1
+    t_sample(i,:) = t_sim(:,1 + (i-1)*Sample_N);
+    Velocity_s(i,:) = Velocity_tmp(1 + (i-1)*Sample_N,1);
+    Heading_angle_tmp_s(i,:) = Heading_angle_tmp(1 + (i-1)*Sample_N,1);
+    Y_s(i,:) = Y(1 + (i-1)*Sample_N,:);
+<span class="keyword">end</span>
+
+figure();
+subplot(2,1,1)
+<span class="comment">% plot(t_sim, Y(:,1), t_sim, Velocity_tmp(:,1));</span>
+plot(t_sim, Y(:,1), t_sample, Velocity_s,<span class="string">'rx'</span>);
+<span class="comment">% hold on; plot(t_sim(:,630), Velocity(630,:),'r x');plot(t_sim(:,end), Velocity(end,:));</span>
+title(<span class="string">'Vehicle velocity vs. Updated velocity'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Velocity (m/s)'</span>);
+legend(<span class="string">'Vehicle velocity'</span>, <span class="string">'Updated velocity'</span>,<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+subplot(2,1,2)
+<span class="comment">% plot(t_sim, Y(:,2), t_sim, Heading_angle_tmp(:,1));</span>
+plot(t_sim, Y(:,2), t_sample, Heading_angle_tmp_s,<span class="string">'rx'</span>);
+<span class="comment">% hold on; plot(t_sim(:,end), Heading_angle_tmp(end,:));</span>
+title(<span class="string">'Vehicle heading angle vs. Updated heading angle'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Heading angle (rad)'</span>);
+legend(<span class="string">'Vehicle heading angle'</span>, <span class="string">'Updated heading angle'</span>,<span class="string">'location'</span>,<span class="string">'southeast'</span>);
+
+figure();
+subplot(2,1,1)
+plot(t_sim, Y(:,1)-Velocity_tmp(:,1));
+title(<span class="string">'Vehicle velocity - Updated velocity'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Velocity error (m/s)'</span>);
+subplot(2,1,2)
+plot(t_sim, Y(:,2)-Heading_angle_tmp(:,1));
+title(<span class="string">'Vehicle heading angle - Updated heading angle'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Heading angle error (rad)'</span>);
+
+clear <span class="string">XYplot_s</span> <span class="string">XYplot_sim_s</span>
+Sample_N = 10;
+<span class="keyword">for</span> i = 1:fix(length(t_sim)/Sample_N)
+    XYplot_s(i,:) = XYplot(1 + (i)*Sample_N,:);
+    XYplot_sim_s(i,:) = XYplot_sim(1 + (i)*Sample_N,:);
+<span class="keyword">end</span>
+<span class="comment">% A =17; B =37;</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(XYplot_s(:,2),XYplot_s(:,1),'r X');</span>
+<span class="comment">% hold on;</span>
+<span class="comment">% plot(XYplot_sim(:,2),XYplot_sim(:,1),'b');</span>
+<span class="comment">% plot(XYplot_s(A,2),XYplot_s(A,1),'* k');text(45.10497667677649,131.6308411214953,'A');</span>
+<span class="comment">% plot(XYplot_s(B,2),XYplot_s(B,1),'* k');text(193.8381,33.8451,'B');</span>
+<span class="comment">% plot(XYplot_s(end,2),XYplot_s(end,1),'* k');text(180.7899,-211.5924,'C');</span>
+<span class="comment">% title('Paths');xlabel('Y (m)'); ylabel('X (m)');</span>
+<span class="comment">% legend('Desired path', 'Vehicle path','location','southwest');</span>
+
+A =22; B =33;
+figure();
+plot(XYplot(:,2),XYplot(:,1),<span class="string">'r -.'</span>);
+<span class="comment">% plot(XYplot_s(:,2),XYplot_s(:,1),'r X');</span>
+hold <span class="string">on</span>;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),<span class="string">'b'</span>);
+plot(XYplot_s(A,2),XYplot_s(A,1),<span class="string">'* k'</span>);text(XYplot_s(A,2)-3,XYplot_s(A,1)+10,<span class="string">'A'</span>);
+plot(XYplot_s(B,2),XYplot_s(B,1),<span class="string">'* k'</span>);text(XYplot_s(B,2)-12,XYplot_s(B,1)+1,<span class="string">'B'</span>);
+plot(XYplot_s(end,2),XYplot_s(end,1),<span class="string">'* k'</span>);text(XYplot_s(end,2)-11,XYplot_s(end,1)+10,<span class="string">'C'</span>);
+title(<span class="string">'Paths'</span>);xlabel(<span class="string">'Y (m)'</span>); ylabel(<span class="string">'X (m)'</span>);
+legend(<span class="string">'Desired path'</span>, <span class="string">'Vehicle path'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+
+figure();
+plot(XYplot_s(:,2),XYplot_s(:,1),<span class="string">'r x'</span>);
+hold <span class="string">on</span>;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),<span class="string">'b '</span>);
+plot(XYplot_s(A,2),XYplot_s(A,1),<span class="string">'* k'</span>);
+title(<span class="string">'Paths @ A'</span>);xlabel(<span class="string">'Y (m)'</span>); ylabel(<span class="string">'X (m)'</span>);
+ylim([XYplot_s(A,1)-0.05, XYplot_s(A,1)+0.05]);xlim([XYplot_s(A,2)-0.05, XYplot_s(A,2)+0.05]);
+legend(<span class="string">'Desired path'</span>, <span class="string">'Vehicle path'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+
+figure();
+plot(XYplot_s(:,2),XYplot_s(:,1),<span class="string">'r x'</span>);
+hold <span class="string">on</span>;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),<span class="string">'b '</span>);
+plot(XYplot_s(B,2),XYplot_s(B,1),<span class="string">'* k'</span>);
+title(<span class="string">'Paths @ B'</span>);xlabel(<span class="string">'Y (m)'</span>); ylabel(<span class="string">'X (m)'</span>);
+ylim([XYplot_s(B,1)-0.05, XYplot_s(B,1)+0.05]);xlim([XYplot_s(B,2)-0.05, XYplot_s(B,2)+0.05]);
+legend(<span class="string">'Desired path'</span>, <span class="string">'Vehicle path'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+
+figure();
+plot(XYplot_s(:,2),XYplot_s(:,1),<span class="string">'r x'</span>);
+hold <span class="string">on</span>;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),<span class="string">'b '</span>);
+plot(XYplot_s(end,2),XYplot_s(end,1),<span class="string">'* k'</span>);
+title(<span class="string">'Paths @ C'</span>);xlabel(<span class="string">'Y (m)'</span>); ylabel(<span class="string">'X (m)'</span>);
+ylim([XYplot_s(end,1)-0.05, XYplot_s(end,1)+0.05]);xlim([XYplot_s(end,2)-0.05, XYplot_s(end,2)+0.05]);
+legend(<span class="string">'Desired path'</span>, <span class="string">'Vehicle path'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+
+<span class="comment">% % Vehicle System Error</span>
+figure();
+plot(t_sim,V_SystemError(:,1)');
+title(<span class="string">'Vehicle system error #1'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Vehicle system error #1 (m/s)'</span>);
+<span class="comment">% ylim([-0.3 0.4]);</span>
+figure();
+plot(t_sim,V_SystemError(:,2)');
+title(<span class="string">'Vehicle system error #2'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Vehicle system error #2 (rad)'</span>)
+<span class="comment">% ylim([-0.05 0.1]);</span>
+<span class="comment">% % Vehicle Output Error</span>
+figure();
+plot(t_sim,V_OutputError(:,1)');
+title(<span class="string">'Vehicle output disturbance #1'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Vehicle output disturbance #1 (m/s)'</span>);
+<span class="comment">% ylim([-2e-10 2.5e-10]);</span>
+figure();
+plot(t_sim,V_OutputError(:,2)');
+title(<span class="string">'Vehicle output disturbance #2'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Vehicle output disturbance #2 (rad)'</span>);
+<span class="comment">% ylim([-6e-11 1.2e-10]);</span>
+<span class="comment">% % Simulator System Error</span>
+figure();
+plot(t_sim,S_SystemError(:,1)');
+title(<span class="string">'Fictitious system error #1'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Fictitious system error #1 (m/s)'</span>);
+<span class="comment">% ylim([-0.3 0.4]);</span>
+figure();
+plot(t_sim,S_SystemError(:,2)');
+title(<span class="string">'Fictitious system error #2'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Fictitious system error #2 (rad)'</span>);
+<span class="comment">% ylim([-0.05 0.1]);</span>
+<span class="comment">% % Simulator Outptu Error</span>
+figure();
+plot(t_sim,S_OutputError(:,1)');
+title(<span class="string">'Fictitious output disturbance #1'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Fictitious output disturbance #1 (m/s)'</span>);
+<span class="comment">% ylim([-2e-10 2.5e-10]);</span>
+figure();
+plot(t_sim,S_OutputError(:,2)');
+title(<span class="string">'Fictitious output disturbance #2'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Fictitious output disturbance #2 (rad)'</span>);
+<span class="comment">% ylim([-6e-11 1.2e-10]);</span>
+
+<span class="comment">% Vehicle Ld*System Error</span>
+figure();
+plot(t_sim,V_Ldterm');title(<span class="string">'L_{d}*e_{sys}(\itk)'</span>);xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Vehicle input disturbances #1-#4'</span>);
+<span class="comment">% ylim([-0.25 0.2]);</span>
+<span class="comment">% Simulator Ld*System Error</span>
+figure();
+plot(t_sim,S_Ldterm');title(<span class="string">'L_{d}*e_{sim}(\itk)'</span>);xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Fictitious input disturbances #1-#4'</span>);
+<span class="comment">% ylim([-0.25 0.2]);</span>
+
+<span class="comment">%%Simulator Control input</span>
+<span class="comment">% S_Steer = Simulator_U(:,1)';</span>
+<span class="comment">% k = 0;</span>
+<span class="comment">% for i=1:length(t_sim)</span>
+<span class="comment">%     k = k + 1;</span>
+<span class="comment">%     if (Simulator_U(i,2)&gt;=0)</span>
+<span class="comment">%         S_Acceleration(1,k) = Simulator_U(i,2);</span>
+<span class="comment">%         S_Brake(1,k) = 0;</span>
+<span class="comment">%     else</span>
+<span class="comment">%         S_Brake(1,k) = -Simulator_U(i,2);</span>
+<span class="comment">%         S_Acceleration(1,k) = 0;</span>
+<span class="comment">%     end</span>
+<span class="comment">% end</span>
+<span class="comment">% figure();</span>
+<span class="comment">% subplot(3,1,1);</span>
+<span class="comment">% plot(t_sim,S_Steer);title('Simulator steer angle');xlabel('Time (s)'); ylabel('Steer');ylim([-(5/3)*pi (5/3)*pi]);</span>
+<span class="comment">% subplot(3,1,2);</span>
+<span class="comment">% plot(t_sim,S_Acceleration);title('Simulator acceleration');xlabel('Time (s)'); ylabel('Acceleration');ylim([0 1]);</span>
+<span class="comment">% subplot(3,1,3);</span>
+<span class="comment">% plot(t_sim,S_Brake);title('Simulator brake');xlabel('Time (s)'); ylabel('Brake');ylim([0 1]);</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+Sample_N = 10;
+<span class="keyword">for</span> i = 1:fix(length(t_sim)/Sample_N)+1
+    y_sim_s(i,:) = y_sim(1 + (i-1)*Sample_N,:);
+<span class="keyword">end</span>
+
+<span class="comment">% Real vs Simulator output</span>
+figure();
+plot(t_sim,Y(:,1),t_sample,y_sim_s(:,1),<span class="string">'rx'</span>);hold <span class="string">on</span>; <span class="comment">%plot(t_sim(:,650), y_sim(650,1),'r x');plot(t_sim(:,end), y_sim(end,1),'r x')</span>
+title(<span class="string">'Vehicle output 1 vs. Simulator output 1'</span>);xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Velocity (m/s)'</span>);
+legend(<span class="string">'Vehicle output 1'</span>,<span class="string">'Simulator output 1'</span>,<span class="string">'Location'</span>,<span class="string">'southeast'</span>);
+figure();
+plot(t_sim,Y(:,2),t_sample,y_sim_s(:,2),<span class="string">'rx'</span>);hold <span class="string">on</span>;<span class="comment">%plot(t_sim(:,6980), y_sim(6980,2),'r x');plot(t_sim(:,end), y_sim(end,2),'r x')</span>
+title(<span class="string">'Vehicle output 2 vs. Simulator output 2'</span>);xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Heading angle (rad)'</span>);
+legend(<span class="string">'Vehicle output 2'</span>,<span class="string">'Simulator output 2'</span>,<span class="string">'Location'</span>,<span class="string">'southeast'</span>);
+<span class="comment">%</span>
+<span class="comment">% % Real - Simulator output</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(t_sim,Y(:,1)-y_sim(:,1));</span>
+<span class="comment">% title('Vehicle output 1 - Simulator output 1');xlabel('Time (s)');</span>
+<span class="comment">% ylim([-0.3 0.5]);</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(t_sim,Y(:,2)-y_sim(:,2));</span>
+<span class="comment">% title('Vehicle output 2 - Simulator output 2');xlabel('Time (s)');</span>
+<span class="comment">% ylim([-0.3 0.5]);</span>
+<span class="comment">%</span>
+<span class="comment">% Sample_N = 10;</span>
+<span class="comment">% for i = 1:fix(length(t_sim)/Sample_N)+1</span>
+<span class="comment">%     Velocity_s(i,:) = Velocity(1 + (i-1)*Sample_N,:);</span>
+<span class="comment">%     Yaw_s(i,:) = Yaw(1 + (i-1)*Sample_N,:);</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(t_sample,Velocity_s,'rx',t_sim,[Velocity(1,:); Simulator_velocity_updated(2:end,1)]);</span>
+<span class="comment">% % hold on; plot(t_sim(:,630), Velocity(630,:),'r x');plot(t_sim(:,end), Velocity(end,:),'r x')</span>
+<span class="comment">% title('Simulator: Desired velocity vs. Updated velocity');xlabel('Time (s)');ylabel('Velocity (m/s)');</span>
+<span class="comment">% legend('Desired velocity','Updated velocity','Location','southeast');</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(t_sample,Yaw_s,'rx',t_sim,[Yaw(1:2,:); Simulator_heading_angle_updated(3:end,1)]);</span>
+<span class="comment">% % hold on; plot(t_sim(:,6980), Yaw(6980,:),'r x'); plot(t_sim(:,end), Yaw(end,:),'r x')</span>
+<span class="comment">% title('Simulator: Desired heading angle vs. Updated heading angle');xlabel('Time (s)');ylabel('Heading angle (rad)');</span>
+<span class="comment">% legend('Desired heading angle','Updated heading angle','Location','southeast');</span>
+<span class="comment">%</span>
+figure();
+plot(XYplot_simulator(:,2),XYplot_simulator(:,1),<span class="string">'r x'</span>);
+hold <span class="string">on</span>;
+plot(XYplot(:,2),XYplot(:,1));
+<span class="comment">% % plot(XYplot_sim(:,2),XYplot_sim(:,1),'b ');</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(XYplot(:,2)-XYplot_simulator(:,2),'b ');</span>
+<span class="comment">% figure();</span>
+<span class="comment">% plot(XYplot(:,1)-XYplot_simulator(:,1),'b ');</span>
+
+figure();
+subplot(2,1,1);
+plot(t_sim,Simulator_U(:,1)*180/pi); hold <span class="string">on</span>; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,1)*180/pi);
+title(<span class="string">'Simulator steer angle'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Steer (deg)'</span>);ylim([-2.5*180/pi  5.3*180/pi]);
+legend(<span class="string">'Simulator steer angle'</span>,<span class="string">'Desired steer angle'</span>,<span class="string">'Location'</span>,<span class="string">'southeast'</span>);
+subplot(2,1,2);
+plot(t_sim,Simulator_U(:,2)); hold <span class="string">on</span>; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,2));
+title(<span class="string">'Simulator Accel. &amp; Brake'</span>); xlabel(<span class="string">'Time (s)'</span>); ylabel(<span class="string">'Accel. &amp; Brake'</span>);ylim([-0.6 1.2]);
+legend(<span class="string">'Simulator accel./brake'</span>,<span class="string">'Desired accel./brake'</span>,<span class="string">'Location'</span>,<span class="string">'southeast'</span>);
+<span class="keyword">end</span>
+<span class="comment">% pdist2(XYplot_sim(end,:), XYplot(end,:))</span>
+<span class="comment">% pdist2(XYplot_sim(end,:), XYplot(end,:))/(max(Velocity)*Ts)</span>
+<span class="comment">%</span>
+<span class="comment">% pdist2(XYplot_simulator(end,:), XYplot(end,:))</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+  clear; clc; close all; warning off
+load OKIDGeneralModelexfront2; Gso = G; Hso = H; Cso = C; %前model
+% load OKIDGeneralModelab1; Gso = G; Hso = H; Cso = C; 
+load OKIDGeneralMiddle_4; Go = G; Ho = H; Co = C; %後model
+load OKIDGeneralModelHigh; G_Final = G; H_Final = H; C_Final = C; D_Final = D;
+load OKIDGeneralModelbrake2; G_Brake = G; H_Brake = H; C_Brake = C; D_Brake = D;
+% OKIDGeneralModelbrake
+load ID_inf_example;
+T_delay = 0;
+Ts = 0.1;Tend = 60+T_delay; Td = 50; Tf = 0.001;
+t_sim = 0:Ts:Tend;
+U_ideal(:,1) = Steer(1:length(t_sim)-T_delay/Ts,:);
+U_ideal(:,2) = Accelcmd(1:length(t_sim)-T_delay/Ts,:);
+Fcncal_transctrl_Ts = 0.01;
+Earlytochange = 1;
+Timetochange = 2; %%sec
+Earlytochange2 = 2.2;
+Timetochange2 = 4.8; %%sec
+Upd_end  = 60.2;
+Upd_flag = 1;
+% Statechange = 0;
+Statechange = Timetochange + 10*Ts;
+Statechange2 = Timetochange2 + 0*Ts;
+
+Dso = zeros(2,2);Do = zeros(2,2);
+DisSYS = ss(Gso,Hso,Cso,Dso,Ts);
+[Eigen_G, TransZeros] = pzmap(DisSYS)
+
+Nc = 6;
+Np = 6;
+n = size(Gso,1);               % No. of states 
+m = size(Hso,2);               % No. of inputs
+p = size(Cso,1);               % No. of outputs
+% Velocity = Velocity(1:length(t_sim),:);
+% Yaw = Yaw(1:length(t_sim),:);
+% XYplot = XYplot(1:length(t_sim),:);
+
+
+for i = 1:T_delay/Ts
+  Velocity = [Velocity; Velocity(end,:)];
+  Yaw = [Yaw; Yaw(end,:)];
+  XYplot = [XYplot; XYplot(end,:)];
+end
+
+Ref = [Velocity Yaw];
+for i = 1:Np
+    ref_end = [];
+    for j = 1:i
+        ref_end = [ref_end;Ref(end,:)];   
+    end
+     Rs_part(:,2*i-1:2*i) = [Ref(i+1:end,:); ref_end];
+end
+
+for i = 1:Np
+    ref_end = [];
+    for j = 1:i
+        ref_end = [ref_end;Velocity(end,:)];   
+    end
+     V_mph_part(:,i) = [Velocity(i+1:end,:); ref_end];
+end
+
+for i = 1:Np-1
+    ref_end = [];
+    for j = 1:i
+        ref_end = [ref_end;Velocity(end,:)];   
+    end
+     V_mph_part_now(:,i) = [Velocity(i+1:end,:); ref_end];
+end
+
+for i = 1:Np-1
+    ref_end = [];
+    for j = 1:i
+        ref_end = [ref_end;Yaw(end,:)];   
+    end
+     Yaw_part_now(:,i) = [Yaw(i+1:end,:); ref_end];
+end
+
+for i = 1:Np
+    ref_end = [];
+    for j = 1:i
+        ref_end = [ref_end;Yaw(end,:)];   
+    end
+     Yaw_part(:,i) = [Yaw(i+1:end,:); ref_end];
+end
+Yaw_part_ref = [Yaw(2:end,:); Yaw(end,:)];
+
+for i = 1:2
+    ref_end = [];
+    for j = 1:i
+        ref_end = [ref_end; XYplot(end,:)];   
+    end
+     XYplot_part(:,2*i-1:2*i) = [XYplot(i+1:end,:); ref_end];
+end
+% XYplot_part = [XYplot(2:end,:); XYplot(end,:)];
+%%Sequential VH update 
+XYplot_X = [];pick_num = 100;
+for i = 1:length(t_sim) 
+   if i <= pick_num/2
+       XYplot_X(:,i) = XYplot(1:pick_num,1);
+   elseif i+pick_num/2 <= length(t_sim)
+       XYplot_X(:,i) = XYplot(i-pick_num/2:i+pick_num/2-1,1);
+   else 
+       XYplot_X(:,i) = XYplot(end-pick_num+1:end,1);
+   end
+end
+
+XYplot_Y = [];
+for i = 1:length(t_sim) 
+   if i <= pick_num/2
+       XYplot_Y(:,i) = XYplot(1:pick_num,2);
+   elseif i+pick_num/2 <= length(t_sim)
+       XYplot_Y(:,i) = XYplot(i-pick_num/2:i+pick_num/2-1,2);
+   else 
+       XYplot_Y(:,i) = XYplot(end-pick_num+1:end,2);
+   end
+end
+% figure();
+% hold on;
+% for i = 1:length(t_sim)
+%     plot(XYplot_Y(:,i),XYplot_X(:,i),'o');
+%     
+% end
+% plot(XYplot(:,2),XYplot(:,1),'x');
+Rs = [t_sim' Rs_part];
+Rs_V = [t_sim' V_mph_part];
+Rs_Y = [t_sim' Yaw_part];
+Rs_V_now = [t_sim' [Velocity V_mph_part_now]];
+Rs_Y_now = [t_sim' [Yaw Yaw_part_now]];
+Endpoint = XYplot(end,:);
+XY_Ref = [t_sim' XYplot_part];
+XYplot_X = [t_sim' XYplot_X'];
+XYplot_Y = [t_sim' XYplot_Y'];
+Yaw_Ref = [t_sim' Yaw_part_ref];
+T_sim = [t_sim' t_sim'];
+Heading_end = Yaw(end,:);
+%% Observer and Mpc
+
+Qo = 1e18*eye(size(Go)); 
+Qso = 1e20*eye(size(Gso)); 
+Qho = 1e20*eye(size(Gso)); 
+Qbo = 1e20*eye(size(Gso)); 
+[Gsd,Hsd,Lsd] = Auxi_HG_Observer(Gso,Hso,Cso,Dso,Ts,Qso);
+[Gd,Hd,Ld] = Auxi_HG_Observer(Go,Ho,Co,Do,Ts,Qo);
+[Gd_Final,Hd_Final,Ld_Final] = Auxi_HG_Observer(G_Final,H_Final,C_Final,D_Final,Ts,Qho);
+[Gd_Brake,Hd_Brake,Ld_Brake] = Auxi_HG_Observer(G_Brake,H_Brake,C_Brake,D_Brake,Ts,Qbo);
+y0 = Ref(1,:);
+xho = Lsd*y0';
+%== constraints parameters
+
+% R_bar = 1e-5*eye(m*Nc); 
+% Qc = eye(p*Np);
+% for i  = 1:2:p*Np
+%     Qc(i,i) = 0.028;
+% end
+
+R_bar = 6e-5*eye(m*Nc); 
+Qc = eye(p*Np);
+for i  = 1:2:p*Np
+    Qc(i,i) = 0.005;
+end
+
+% R_bar = 3e-5*eye(m*Nc); 
+% Qc = eye(p*Np);
+% for i  = 1:2:p*Np
+%     Qc(i,i) = 0.02539;
+% end
+
+[phis,Fs] = mpcgain_okid3(Gsd,Hsd,Cso,Dso,Lsd,Nc,Np);
+[phi,F] = mpcgain_okid3(Gd,Hd,Co,Do,Ld,Nc,Np);
+[phi_Final,F_Final] = mpcgain_okid3(Gd_Final,Hd_Final,C_Final,D_Final,Ld_Final,Nc,Np);
+[phi_Brake,F_Brake] = mpcgain_okid3(Gd_Brake,Hd_Brake,C_Brake,D_Brake,Ld_Brake,Nc,Np);
+
+M = [ eye(m*Nc); 
+     -eye(m*Nc);
+      eye(m*Nc); 
+     -eye(m*Nc);
+     ];
+ 
+ %%=== HQP
+u1_max =  5/3*pi; u1_min = -5/3*pi;
+u2_max = 1; u2_min = -1;
+ 
+ U_max = []; U_min = [];
+for i = 1:Np
+    U_max = [U_max; [u1_max; u2_max]];
+    U_min = [U_min; [-u1_min; -u2_min]];
+end
+ 
+JEs = 2*(phis'*Qc*phis+R_bar);
+JE = 2*(phi'*Qc*phi+R_bar); 
+JE_Final = 2*(phi_Final'*Qc*phi_Final+R_bar);
+JE_Brake = 2*(phi_Brake'*Qc*phi_Brake+R_bar); 
+
+JF_parts = -2*phis'*Qc;
+JF_part = -2*phi'*Qc;
+JF_part_Final = -2*phi_Final'*Qc;
+JF_part_Brake = -2*phi_Brake'*Qc;
+
+
+%% Parameters of Simulator Front 
+G_Front = Gso; H_Front = Hso; C_Front = Cso; Ld_Front = Lsd; Gd_Front = Gsd; Hd_Front = Hsd;
+JE_Front = JEs; phi_Front = phis; F_Front = Fs;
+C_sim_Front = inv(eye(p)-C_Front*Ld_Front)*C_Front*(eye(n)-Ld_Front*C_Front);
+
+C_sys_Front = C_sim_Front - C_Front;
+G_sys_Front = (eye(n)+Ld_Front*C_sys_Front)*G_Front;
+H_sys_Front = (eye(n)+Ld_Front*C_sys_Front)*H_Front;
+
+C_out_Front = (C_sim_Front-C_Front*(eye(n)+Ld_Front*C_sys_Front))*G_Front;
+D_out_Front = (C_sim_Front-C_Front*(eye(n)+Ld_Front*C_sys_Front))*H_Front;
+%% Parameters of Simulator Middle 
+G_Middle = Go; H_Middle = Ho; C_Middle = Co; Ld_Middle = Ld; Gd_Middle = Gd; Hd_Middle = Hd;
+JE_Middle = JE; phi_Middle = phi; F_Middle = F;
+C_sim_Middle = inv(eye(p)-C_Middle*Ld_Middle)*C_Middle*(eye(n)-Ld_Middle*C_Middle);
+
+C_sys_Middle = C_sim_Middle - C_Middle;
+G_sys_Middle = (eye(n)+Ld_Middle*C_sys_Middle)*G_Middle;
+H_sys_Middle = (eye(n)+Ld_Middle*C_sys_Middle)*H_Middle;
+
+C_out_Middle = (C_sim_Middle-C_Middle*(eye(n)+Ld_Middle*C_sys_Middle))*G_Middle;
+D_out_Middle = (C_sim_Middle-C_Middle*(eye(n)+Ld_Middle*C_sys_Middle))*H_Middle;
+%% Parameters of Simulator Final
+G_Final = G_Final; H_Final = H_Final; C_Final = C_Final; Ld_Final = Ld_Final; Gd_Final = Gd_Final; Hd_Final = Hd_Final;
+JE_Final = JE_Final; phi_Final = phi_Final; F_Final = F_Final;
+C_sim_Final = inv(eye(p)-C_Final*Ld_Final)*C_Final*(eye(n)-Ld_Final*C_Final);
+
+C_sys_Final = C_sim_Final - C_Final;
+G_sys_Final = (eye(n)+Ld_Final*C_sys_Final)*G_Final;
+H_sys_Final = (eye(n)+Ld_Final*C_sys_Final)*H_Final;
+
+C_out_Final = (C_sim_Final-C_Final*(eye(n)+Ld_Final*C_sys_Final))*G_Final;
+D_out_Final = (C_sim_Final-C_Final*(eye(n)+Ld_Final*C_sys_Final))*H_Final;
+%% Parameters of Simulator Brake
+G_Brake = G_Brake; H_Brake = H_Brake; C_Brake = C_Brake; Ld_Brake = Ld_Brake; Gd_Brake = Gd_Brake; Hd_Brake = Hd_Brake;
+JE_Brake = JE_Brake; phi_Brake = phi_Brake; F_Brake = F_Brake;
+C_sim_Brake = inv(eye(p)-C_Brake*Ld_Brake)*C_Brake*(eye(n)-Ld_Brake*C_Brake);
+
+C_sys_Brake = C_sim_Brake - C_Brake;
+G_sys_Brake = (eye(n)+Ld_Brake*C_sys_Brake)*G_Brake;
+H_sys_Brake = (eye(n)+Ld_Brake*C_sys_Brake)*H_Brake;
+
+C_out_Brake = (C_sim_Brake-C_Brake*(eye(n)+Ld_Brake*C_sys_Brake))*G_Brake;
+D_out_Brake = (C_sim_Brake-C_Brake*(eye(n)+Ld_Brake*C_sys_Brake))*H_Brake;
+%% Sim
+tic
+sim('ISReferenceApplication');
+toc
+
+% figure();
+% subplot(2,1,1);
+% plot(t_sim(),Simulator_U(:,1)); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,1));
+% title('Simulator steer angle'); xlabel('Time (s)'); ylabel('Steer (rad)');ylim([-5/3*pi  5/3*pi]);
+% legend('Control u','Desired u');
+% subplot(2,1,2);
+% plot(t_sim,Simulator_U(:,2)); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,2)); 
+% title('Simulator accel & brake'); xlabel('Time (s)'); ylabel('Accel & Brake');ylim([-1 1])
+% legend('Control u','Desired u');
+% sum(abs(Y(:,1)-Velocity_updated)) + sum(abs(Y(:,2)-Heading_angle_updated))
+%% Diagram
+if length(Y) == length(t_sim)
+close all;
+% % Y & Yhat
+% % subplot(2,1,1)
+% % plot(t_sim,Y(:,1),t_sim,Yhat(:,1)');
+% % title('Velocity vs. Estimated Velocity'); xlabel('Time (s)'); ylabel('Velocity (m/s)');
+% % subplot(2,1,2)
+% % plot(t_sim,Y(:,2),t_sim,Yhat(:,2)');
+% % title('Heading angle vs. Estimated heading angle'); xlabel('Time (s)'); ylabel('Yaw angle (rad)');
+% 
+figure();
+subplot(2,1,1);
+plot(t_sim,U(:,1)*180/pi); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,1)*180/pi,'-.');
+title('Steer angle'); xlabel('Time (s)'); ylabel('Steer (deg)');ylim([-3*180/pi  5.2*180/pi]);
+legend('Vehicle steer angle','Desired steer angle','location','southeast');
+subplot(2,1,2);
+plot(t_sim,U(:,2)); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,2),'-.'); 
+title('Accel. & Brake'); xlabel('Time (s)'); ylabel('Accel. & Brake');ylim([-0.6 1.2])
+legend('Vehicle accel./brake','Desired accel./brake','location','southeast');
+
+% figure();
+% subplot(3,1,1);
+% plot(tout,Steer); title('Steer angle'); xlabel('Time (s)'); ylabel('Steer (rad)');ylim([-5/3*pi  5/3*pi]);
+% subplot(3,1,2) 
+% plot(tout,Acceleration);title('Acceleration'); xlabel('Time (s)'); ylabel('Acceleration');ylim([0 1]);
+% subplot(3,1,3) 
+% plot(tout,Brake); title('Brake'); xlabel('Time (s)'); ylabel('Brake');ylim([0 1]);
+
+
+clear Desired_Heading_angle Desired_Velocity
+Sample_N = 10;
+for i = 1:fix(length(t_sim)/Sample_N)+1
+    t_sample(i,:) = t_sim(:,1 + (i-1)*Sample_N);
+    Desired_Velocity(i,:) = Velocity(1 + (i-1)*Sample_N,1);
+    Desired_Heading_angle(i,:) = Yaw(1 + (i-1)*Sample_N,1);
+end
+
+% figure();
+% subplot(2,1,1)
+% plot(t_sim, Y(:,1), t_sample, Desired_Velocity(:,1),'x');
+% % plot(t_sim, Y(:,1), t_sample, Velocity_s,'rx');
+% % hold on; plot(t_sim(:,630), Velocity(630,:),'r x');plot(t_sim(:,end), Velocity(end,:));
+% title('Vehicle velocity vs. Desired velocity'); xlabel('Time (s)'); ylabel('Velocity (m/s)');
+% legend('Vehicle velocity', 'Desired velocity','location','southeast');
+% subplot(2,1,2)
+% plot(t_sim, Y(:,2), t_sample, Desired_Heading_angle(:,1),'x'); 
+% % plot(t_sim, Y(:,2), t_sample, Heading_angle_tmp_s,'rx'); 
+% % hold on; plot(t_sim(:,end), Heading_angle_tmp(end,:));
+% title('Vehicle heading angle vs. Desired heading angle'); xlabel('Time (s)'); ylabel('Heading angle (rad)');
+% legend('Vehicle heading angle', 'Desired heading angle','location','southeast');
+
+% % Track
+clear Heading_angle_updated_s Velocity_s t_sample Y_s
+Sample_N = 10;
+Velocity_tmp = [Velocity(1,:); Velocity_updated(2:end,1)];
+Heading_angle_tmp = [Yaw(1:2,:); Heading_angle_updated(3:end,1)];
+% Velocity_tmp = [Velocity(1,:); Velocity_updated(2:end-51,1); Velocity(651:end,:)];
+% Heading_angle_tmp = [Yaw(1:2,:); Heading_angle_updated(3:end-51,1);Yaw(651:end,:)];
+for i = 1:fix(length(t_sim)/Sample_N)+1
+    t_sample(i,:) = t_sim(:,1 + (i-1)*Sample_N);
+    Velocity_s(i,:) = Velocity_tmp(1 + (i-1)*Sample_N,1);
+    Heading_angle_tmp_s(i,:) = Heading_angle_tmp(1 + (i-1)*Sample_N,1);
+    Y_s(i,:) = Y(1 + (i-1)*Sample_N,:);
+end
+
+figure();
+subplot(2,1,1)
+% plot(t_sim, Y(:,1), t_sim, Velocity_tmp(:,1));
+plot(t_sim, Y(:,1), t_sample, Velocity_s,'rx');
+% hold on; plot(t_sim(:,630), Velocity(630,:),'r x');plot(t_sim(:,end), Velocity(end,:));
+title('Vehicle velocity vs. Updated velocity'); xlabel('Time (s)'); ylabel('Velocity (m/s)');
+legend('Vehicle velocity', 'Updated velocity','location','southeast');
+subplot(2,1,2)
+% plot(t_sim, Y(:,2), t_sim, Heading_angle_tmp(:,1)); 
+plot(t_sim, Y(:,2), t_sample, Heading_angle_tmp_s,'rx'); 
+% hold on; plot(t_sim(:,end), Heading_angle_tmp(end,:));
+title('Vehicle heading angle vs. Updated heading angle'); xlabel('Time (s)'); ylabel('Heading angle (rad)');
+legend('Vehicle heading angle', 'Updated heading angle','location','southeast');
+
+figure();
+subplot(2,1,1)
+plot(t_sim, Y(:,1)-Velocity_tmp(:,1));
+title('Vehicle velocity - Updated velocity'); xlabel('Time (s)'); ylabel('Velocity error (m/s)');
+subplot(2,1,2)
+plot(t_sim, Y(:,2)-Heading_angle_tmp(:,1));
+title('Vehicle heading angle - Updated heading angle'); xlabel('Time (s)'); ylabel('Heading angle error (rad)');
+
+clear XYplot_s XYplot_sim_s
+Sample_N = 10;
+for i = 1:fix(length(t_sim)/Sample_N)
+    XYplot_s(i,:) = XYplot(1 + (i)*Sample_N,:);
+    XYplot_sim_s(i,:) = XYplot_sim(1 + (i)*Sample_N,:);
+end
+% A =17; B =37;
+% figure();
+% plot(XYplot_s(:,2),XYplot_s(:,1),'r X');
+% hold on;
+% plot(XYplot_sim(:,2),XYplot_sim(:,1),'b');
+% plot(XYplot_s(A,2),XYplot_s(A,1),'* k');text(45.10497667677649,131.6308411214953,'A');
+% plot(XYplot_s(B,2),XYplot_s(B,1),'* k');text(193.8381,33.8451,'B');
+% plot(XYplot_s(end,2),XYplot_s(end,1),'* k');text(180.7899,-211.5924,'C');
+% title('Paths');xlabel('Y (m)'); ylabel('X (m)');
+% legend('Desired path', 'Vehicle path','location','southwest');
+
+A =22; B =33;
+figure();
+plot(XYplot(:,2),XYplot(:,1),'r -.');
+% plot(XYplot_s(:,2),XYplot_s(:,1),'r X');
+hold on;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),'b');
+plot(XYplot_s(A,2),XYplot_s(A,1),'* k');text(XYplot_s(A,2)-3,XYplot_s(A,1)+10,'A');
+plot(XYplot_s(B,2),XYplot_s(B,1),'* k');text(XYplot_s(B,2)-12,XYplot_s(B,1)+1,'B');
+plot(XYplot_s(end,2),XYplot_s(end,1),'* k');text(XYplot_s(end,2)-11,XYplot_s(end,1)+10,'C');
+title('Paths');xlabel('Y (m)'); ylabel('X (m)');
+legend('Desired path', 'Vehicle path','location','southwest');
+
+figure();
+plot(XYplot_s(:,2),XYplot_s(:,1),'r x');
+hold on;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),'b ');
+plot(XYplot_s(A,2),XYplot_s(A,1),'* k');
+title('Paths @ A');xlabel('Y (m)'); ylabel('X (m)');
+ylim([XYplot_s(A,1)-0.05, XYplot_s(A,1)+0.05]);xlim([XYplot_s(A,2)-0.05, XYplot_s(A,2)+0.05]);
+legend('Desired path', 'Vehicle path','location','southwest');
+
+figure();
+plot(XYplot_s(:,2),XYplot_s(:,1),'r x');
+hold on;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),'b ');
+plot(XYplot_s(B,2),XYplot_s(B,1),'* k');
+title('Paths @ B');xlabel('Y (m)'); ylabel('X (m)');
+ylim([XYplot_s(B,1)-0.05, XYplot_s(B,1)+0.05]);xlim([XYplot_s(B,2)-0.05, XYplot_s(B,2)+0.05]);
+legend('Desired path', 'Vehicle path','location','southwest');
+
+figure();
+plot(XYplot_s(:,2),XYplot_s(:,1),'r x');
+hold on;
+plot(XYplot_sim(:,2),XYplot_sim(:,1),'b ');
+plot(XYplot_s(end,2),XYplot_s(end,1),'* k');
+title('Paths @ C');xlabel('Y (m)'); ylabel('X (m)');
+ylim([XYplot_s(end,1)-0.05, XYplot_s(end,1)+0.05]);xlim([XYplot_s(end,2)-0.05, XYplot_s(end,2)+0.05]);
+legend('Desired path', 'Vehicle path','location','southwest');
+
+% % Vehicle System Error
+figure();
+plot(t_sim,V_SystemError(:,1)');
+title('Vehicle system error #1'); xlabel('Time (s)'); ylabel('Vehicle system error #1 (m/s)');
+% ylim([-0.3 0.4]);
+figure();
+plot(t_sim,V_SystemError(:,2)');
+title('Vehicle system error #2'); xlabel('Time (s)'); ylabel('Vehicle system error #2 (rad)')
+% ylim([-0.05 0.1]);
+% % Vehicle Output Error
+figure();
+plot(t_sim,V_OutputError(:,1)');
+title('Vehicle output disturbance #1'); xlabel('Time (s)'); ylabel('Vehicle output disturbance #1 (m/s)');
+% ylim([-2e-10 2.5e-10]);
+figure();
+plot(t_sim,V_OutputError(:,2)');
+title('Vehicle output disturbance #2'); xlabel('Time (s)'); ylabel('Vehicle output disturbance #2 (rad)');
+% ylim([-6e-11 1.2e-10]);
+% % Simulator System Error
+figure();
+plot(t_sim,S_SystemError(:,1)');
+title('Fictitious system error #1'); xlabel('Time (s)'); ylabel('Fictitious system error #1 (m/s)');
+% ylim([-0.3 0.4]);
+figure();
+plot(t_sim,S_SystemError(:,2)');
+title('Fictitious system error #2'); xlabel('Time (s)'); ylabel('Fictitious system error #2 (rad)');
+% ylim([-0.05 0.1]);
+% % Simulator Outptu Error
+figure();
+plot(t_sim,S_OutputError(:,1)');
+title('Fictitious output disturbance #1'); xlabel('Time (s)'); ylabel('Fictitious output disturbance #1 (m/s)');
+% ylim([-2e-10 2.5e-10]);
+figure();
+plot(t_sim,S_OutputError(:,2)');
+title('Fictitious output disturbance #2'); xlabel('Time (s)'); ylabel('Fictitious output disturbance #2 (rad)');
+% ylim([-6e-11 1.2e-10]);
+
+% Vehicle Ld*System Error
+figure();
+plot(t_sim,V_Ldterm');title('L_{d}*e_{sys}(\itk)');xlabel('Time (s)'); ylabel('Vehicle input disturbances #1-#4');
+% ylim([-0.25 0.2]);
+% Simulator Ld*System Error
+figure();
+plot(t_sim,S_Ldterm');title('L_{d}*e_{sim}(\itk)');xlabel('Time (s)'); ylabel('Fictitious input disturbances #1-#4');
+% ylim([-0.25 0.2]);
+
+%%Simulator Control input
+% S_Steer = Simulator_U(:,1)';
+% k = 0;
+% for i=1:length(t_sim)
+%     k = k + 1;
+%     if (Simulator_U(i,2)>=0)
+%         S_Acceleration(1,k) = Simulator_U(i,2);
+%         S_Brake(1,k) = 0;
+%     else
+%         S_Brake(1,k) = -Simulator_U(i,2);
+%         S_Acceleration(1,k) = 0;
+%     end
+% end
+% figure();
+% subplot(3,1,1);
+% plot(t_sim,S_Steer);title('Simulator steer angle');xlabel('Time (s)'); ylabel('Steer');ylim([-(5/3)*pi (5/3)*pi]);
+% subplot(3,1,2);
+% plot(t_sim,S_Acceleration);title('Simulator acceleration');xlabel('Time (s)'); ylabel('Acceleration');ylim([0 1]);
+% subplot(3,1,3);
+% plot(t_sim,S_Brake);title('Simulator brake');xlabel('Time (s)'); ylabel('Brake');ylim([0 1]);
+% 
+% 
+Sample_N = 10;
+for i = 1:fix(length(t_sim)/Sample_N)+1
+    y_sim_s(i,:) = y_sim(1 + (i-1)*Sample_N,:);
+end
+
+% Real vs Simulator output
+figure();
+plot(t_sim,Y(:,1),t_sample,y_sim_s(:,1),'rx');hold on; %plot(t_sim(:,650), y_sim(650,1),'r x');plot(t_sim(:,end), y_sim(end,1),'r x')
+title('Vehicle output 1 vs. Simulator output 1');xlabel('Time (s)'); ylabel('Velocity (m/s)');
+legend('Vehicle output 1','Simulator output 1','Location','southeast');
+figure();
+plot(t_sim,Y(:,2),t_sample,y_sim_s(:,2),'rx');hold on;%plot(t_sim(:,6980), y_sim(6980,2),'r x');plot(t_sim(:,end), y_sim(end,2),'r x')
+title('Vehicle output 2 vs. Simulator output 2');xlabel('Time (s)'); ylabel('Heading angle (rad)');
+legend('Vehicle output 2','Simulator output 2','Location','southeast');
+% 
+% % Real - Simulator output
+% figure();
+% plot(t_sim,Y(:,1)-y_sim(:,1));
+% title('Vehicle output 1 - Simulator output 1');xlabel('Time (s)');
+% ylim([-0.3 0.5]);
+% figure();
+% plot(t_sim,Y(:,2)-y_sim(:,2));
+% title('Vehicle output 2 - Simulator output 2');xlabel('Time (s)');
+% ylim([-0.3 0.5]);
+% 
+% Sample_N = 10;
+% for i = 1:fix(length(t_sim)/Sample_N)+1
+%     Velocity_s(i,:) = Velocity(1 + (i-1)*Sample_N,:);
+%     Yaw_s(i,:) = Yaw(1 + (i-1)*Sample_N,:);
+% end
+% 
+% 
+% figure();
+% plot(t_sample,Velocity_s,'rx',t_sim,[Velocity(1,:); Simulator_velocity_updated(2:end,1)]);
+% % hold on; plot(t_sim(:,630), Velocity(630,:),'r x');plot(t_sim(:,end), Velocity(end,:),'r x')
+% title('Simulator: Desired velocity vs. Updated velocity');xlabel('Time (s)');ylabel('Velocity (m/s)');
+% legend('Desired velocity','Updated velocity','Location','southeast');
+% figure();
+% plot(t_sample,Yaw_s,'rx',t_sim,[Yaw(1:2,:); Simulator_heading_angle_updated(3:end,1)]);
+% % hold on; plot(t_sim(:,6980), Yaw(6980,:),'r x'); plot(t_sim(:,end), Yaw(end,:),'r x')
+% title('Simulator: Desired heading angle vs. Updated heading angle');xlabel('Time (s)');ylabel('Heading angle (rad)');
+% legend('Desired heading angle','Updated heading angle','Location','southeast');
+% 
+figure();
+plot(XYplot_simulator(:,2),XYplot_simulator(:,1),'r x');
+hold on;
+plot(XYplot(:,2),XYplot(:,1));
+% % plot(XYplot_sim(:,2),XYplot_sim(:,1),'b ');
+% figure();
+% plot(XYplot(:,2)-XYplot_simulator(:,2),'b ');
+% figure();
+% plot(XYplot(:,1)-XYplot_simulator(:,1),'b ');
+
+figure();
+subplot(2,1,1);
+plot(t_sim,Simulator_U(:,1)*180/pi); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,1)*180/pi);
+title('Simulator steer angle'); xlabel('Time (s)'); ylabel('Steer (deg)');ylim([-2.5*180/pi  5.3*180/pi]);
+legend('Simulator steer angle','Desired steer angle','Location','southeast');
+subplot(2,1,2);
+plot(t_sim,Simulator_U(:,2)); hold on; plot(t_sim(:,1:end-T_delay/Ts),U_ideal(:,2)); 
+title('Simulator Accel. & Brake'); xlabel('Time (s)'); ylabel('Accel. & Brake');ylim([-0.6 1.2]);
+legend('Simulator accel./brake','Desired accel./brake','Location','southeast');
+end
+% pdist2(XYplot_sim(end,:), XYplot(end,:))
+% pdist2(XYplot_sim(end,:), XYplot(end,:))/(max(Velocity)*Ts)
+% 
+% pdist2(XYplot_simulator(end,:), XYplot(end,:))
+
+##### SOURCE END #####
+--></body></html>
